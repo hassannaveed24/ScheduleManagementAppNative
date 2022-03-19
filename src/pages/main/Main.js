@@ -4,6 +4,9 @@ import {
   StyledCurrentDate,
   StyledHorizontalLine,
   StyledHorizontalView,
+  StyledIconView,
+  StyledLogoutIcon,
+  StyledLogoutView,
   StyledMainView,
   StyledProfileButtonText,
   StyledProfileButtonView,
@@ -29,90 +32,28 @@ import axios from 'axios';
 import { useMutation } from 'react-query';
 import Geolocation from '@react-native-community/geolocation';
 
-// import * as Location from 'expo-location';
 import { showToast } from '../../helpers/useToast';
 import ScreenWrapper from '../../components/screenWrapper/ScreenWrapper';
 import { useBackHandler } from '@react-native-community/hooks';
 
 function Main({ navigation, setNavigation }) {
-  const getCurrentLocation = async () => {
-    // if (Platform.OS !== 'android') {
-    //   throw new Error('Invalid platform');
-    // }
-    // const status = await Location.requestForegroundPermissionsAsync();
-    // if (status.status !== 'granted') {
-    //   throw new Error('Location not granted');
-    // }
-
-    // const location = await Location.getCurrentPositionAsync({});
-
-    // if (location.hasOwnProperty('mocked') && location.mocked) {
-    //   throw new Error('Please turn off mock location');
-    // }
-
-    console.log('in getting current location');
-    Geolocation.getCurrentPosition(
-      position => {
-        console.log('position success');
-        console.log(position.coords.longitude);
-        const location = {
-          lat: position.coords.latitude,
-          long: position.coords.longitude,
-        };
-        return location;
-      },
-      error => {
-        console.log(JSON.stringify(error));
-        showToast(JSON.stringify(error));
-        return;
-      },
-      { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 },
-    );
-
-    return {
-      // lat: location.coords?.latitude,
-      // long: location.coords?.longitude,
-      // lat: navigation.data?.location?.coordinates.lat,
-      // long: navigation.data?.location?.coordinates.long,
-      // lat: info.coords.latitude,
-      // long: info.coords.longitude,
-    };
-  };
   const [currentPunchMode, setCurrentPunchMode] = useState(navigation.data.currentPunchMode);
   const [lastIn, setLastIn] = useState(
     navigation.data.currentPunchMode === 'stop' ? navigation.data.lastIn : new Date(),
   );
 
   const mutation = useMutation(
-    () => {
-      Geolocation.getCurrentPosition(
-        position => {
-          console.log('position success');
-          const location = {
-            lat: position.coords.latitude,
-            long: position.coords.longitude,
-          };
-          console.log(location);
-          console.log(process.env.BASE_URL);
-          return axios.post(
-            process.env.BASE_URL + '/employees/' + currentPunchMode + '-tracking',
-            { ...location, nowDate: dayjs().utc().format() },
-            {
-              headers: { Authorization: `Bearer ${navigation.data?.token}` },
-            },
-          );
+    location => {
+      return axios.post(
+        process.env.BASE_URL + '/employees/' + currentPunchMode + '-tracking',
+        { ...location, nowDate: dayjs().utc().format() },
+        {
+          headers: { Authorization: `Bearer ${navigation.data?.token}` },
         },
-        error => {
-          console.log(JSON.stringify(error));
-          showToast(JSON.stringify(error));
-          return;
-        },
-        { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 },
       );
     },
     {
       onSuccess: data => {
-        console.log(data);
         setCurrentPunchMode(data.data.currentPunchMode);
         setLastIn(data.data.lastIn);
         setNavigation(prev => ({
@@ -125,8 +66,6 @@ function Main({ navigation, setNavigation }) {
         }));
       },
       onError: e => {
-        console.log('error');
-        console.log(e);
         showToast(e.response?.data?.data || e.message);
       },
       retry: false,
@@ -137,7 +76,28 @@ function Main({ navigation, setNavigation }) {
     if (mutation.isLoading) {
       return;
     }
-    mutation.mutate();
+
+    Geolocation.getCurrentPosition(
+      position => {
+        const location = {
+          lat: position.coords.latitude,
+          long: position.coords.longitude,
+        };
+        return mutation.mutate(location);
+      },
+      error => {
+        showToast(error.message);
+        return;
+      },
+      { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 },
+    );
+  };
+
+  const handleLogout = () => {
+    setNavigation({
+      navigation: 'login',
+      data: {},
+    });
   };
 
   useBackHandler(() => {
@@ -160,7 +120,14 @@ function Main({ navigation, setNavigation }) {
         <StyledView>
           <StyledHorizontalView>
             <UserAvatar size={50} name={navigation.data.name} bgColor={theme.textColor} />
-            <StyledUserName>{navigation.data.name}</StyledUserName>
+            <StyledUserName>{navigation?.data?.name || 'user name'}</StyledUserName>
+            <TouchableWithoutFeedback onPress={handleLogout}>
+              <StyledLogoutView>
+                <StyledLogoutIcon>
+                  <Icon name="log-out-outline" size={40} color={theme.danger} style={{}} />
+                </StyledLogoutIcon>
+              </StyledLogoutView>
+            </TouchableWithoutFeedback>
           </StyledHorizontalView>
         </StyledView>
       </StyledMainView>
@@ -173,7 +140,7 @@ function Main({ navigation, setNavigation }) {
         {/* Location */}
         <StyledView>
           <StyledHorizontalView>
-            <Icon name="location-sharp" color={theme.textColor} />
+            <Icon name="location-sharp" size={20} color={theme.textColor} />
             <StyledText>{navigation.data?.location?.name || 'Assigned Location'}</StyledText>
           </StyledHorizontalView>
         </StyledView>
@@ -181,7 +148,9 @@ function Main({ navigation, setNavigation }) {
         {/* Manager Name */}
         <StyledView>
           <StyledHorizontalView>
-            <FontAwesome5 name="user" color={theme.textColor} />
+            <StyledIconView>
+              <FontAwesome5 name="user" size={18} color={theme.textColor} />
+            </StyledIconView>
             <StyledText>{navigation?.data?.manager?.name || 'Manager Name'}</StyledText>
           </StyledHorizontalView>
         </StyledView>

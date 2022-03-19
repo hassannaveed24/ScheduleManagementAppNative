@@ -26,6 +26,17 @@ export const StyledUserName = styled.Text`
   font-size: 20px;
   color: ${theme.textColor};
   margin-left: 15px;
+  text-text-transform: capitalize;
+`;
+
+export const StyledLogoutView = styled.View`
+  position: absolute;
+  right: 0;
+  min-width: 80px;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `;
 
 export const StyledHorizontalLine = styled.View`
@@ -47,6 +58,18 @@ export const StyledHorizontalView = styled.View`
   flex-direction: row;
   align-items: center;
 `;
+
+export const StyledIconView = styled.View`
+  margin-right: 3px;
+  margin-left: 2px;
+`;
+
+export const StyledLogoutIcon = styled.View`
+  position: absolute;
+  right: 15;
+  margin: auto;
+`;
+
 export const StyledText = styled.Text`
   font-family: 'ClassicGrotesqueW01-Regular';
   font-style: normal;
@@ -64,7 +87,9 @@ export const StyledStartButtonView = styled.View`
   display: flex;
   align-items: center;
   justify-content: center;
+  margin: auto;
 `;
+
 export const StyledStartButtonText = styled.Text`
   font-family: Roboto;
   font-style: normal;

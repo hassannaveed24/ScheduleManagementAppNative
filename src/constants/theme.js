@@ -8,4 +8,5 @@ export default {
   labelColor: '#4C5B73',
   buttonTextColor: 'white',
   error: 'red',
+  danger: 'red',
 };

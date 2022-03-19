@@ -34,7 +34,6 @@ const ScheduleTable = ({ navigation }) => {
   const query = useQuery(
     ['roster', dateRange.startDate.toDate()],
     () => {
-      console.log('getting roster');
       return axios.get(process.env.BASE_URL + '/roster/single', {
         params: { date: dateRange.startDate.utc().format('YYYY-MM-DD') },
         headers: { Authorization: `Bearer ${navigation.data?.token}` },
