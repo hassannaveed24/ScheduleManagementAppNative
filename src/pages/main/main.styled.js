@@ -26,7 +26,7 @@ export const StyledUserName = styled.Text`
   font-size: 20px;
   color: ${theme.textColor};
   margin-left: 15px;
-  text-text-transform: capitalize;
+  text-transform: capitalize;
 `;
 
 export const StyledLogoutView = styled.View`
@@ -66,7 +66,7 @@ export const StyledIconView = styled.View`
 
 export const StyledLogoutIcon = styled.View`
   position: absolute;
-  right: 15;
+  right: 15px;
   margin: auto;
 `;
 
