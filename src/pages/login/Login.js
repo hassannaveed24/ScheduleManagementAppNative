@@ -96,6 +96,7 @@ const Login = ({ navigation, setNavigation }) => {
           <StyledEmailPasswordView>
             <StyledEmailPasswordImage source={emailIcon} />
             <StyledTextInput
+              placeholderTextColor={'#C7C7CD'}
               blurOnSubmit={false}
               placeholder="Enter your email.."
               autoCompleteType="email"
@@ -114,6 +115,7 @@ const Login = ({ navigation, setNavigation }) => {
           <StyledEmailPasswordView>
             <StyledEmailPasswordImage source={passwordIcon} />
             <StyledTextInput
+              placeholderTextColor={'#C7C7CD'}
               ref={ref => (passwordInputRef.current = ref)}
               placeholder="Password"
               autoCapitalize="none"

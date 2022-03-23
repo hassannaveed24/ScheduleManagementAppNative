@@ -64,6 +64,7 @@ export const SetPasswordModal = ({
             <StyledEmailPasswordView>
               <StyledEmailPasswordImage source={passwordIcon} />
               <StyledTextInput
+                placeholderTextColor={'#C7C7CD'}
                 placeholder="Set Password"
                 autoCapitalize="none"
                 secureTextEntry={isPasswordHide}
