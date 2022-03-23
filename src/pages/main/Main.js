@@ -37,6 +37,7 @@ import ScreenWrapper from '../../components/screenWrapper/ScreenWrapper';
 import { useBackHandler } from '@react-native-community/hooks';
 
 function Main({ navigation, setNavigation }) {
+  const [loading, setLoading] = useState(false);
   const [currentPunchMode, setCurrentPunchMode] = useState(navigation.data.currentPunchMode);
   const [lastIn, setLastIn] = useState(
     navigation.data.currentPunchMode === 'stop' ? navigation.data.lastIn : new Date(),
@@ -76,16 +77,20 @@ function Main({ navigation, setNavigation }) {
     if (mutation.isLoading) {
       return;
     }
-
+    setLoading(true);
     Geolocation.getCurrentPosition(
       position => {
         const location = {
           lat: position.coords.latitude,
           long: position.coords.longitude,
         };
+        setLoading(false);
+
         return mutation.mutate(location);
       },
       error => {
+        setLoading(false);
+
         showToast(error.message);
         return;
       },
@@ -120,7 +125,7 @@ function Main({ navigation, setNavigation }) {
         <StyledView>
           <StyledHorizontalView>
             <UserAvatar size={50} name={navigation.data.name} bgColor={theme.textColor} />
-            <StyledUserName>{navigation?.data?.name || 'user name'}</StyledUserName>
+            <StyledUserName>{(navigation?.data?.name || 'user name') + loading}</StyledUserName>
             <TouchableWithoutFeedback onPress={handleLogout}>
               <StyledLogoutView>
                 <StyledLogoutIcon>
@@ -167,7 +172,7 @@ function Main({ navigation, setNavigation }) {
           {/* Start/Stop Button */}
           <TouchableWithoutFeedback onPress={handlePunch}>
             <StyledStartButtonView>
-              {mutation.isLoading ? (
+              {mutation.isLoading || loading ? (
                 <BackgroundLoader />
               ) : (
                 <StyledStartButtonText>{currentPunchMode}</StyledStartButtonText>
