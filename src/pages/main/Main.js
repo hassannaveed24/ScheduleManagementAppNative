@@ -125,7 +125,7 @@ function Main({ navigation, setNavigation }) {
         <StyledView>
           <StyledHorizontalView>
             <UserAvatar size={50} name={navigation.data.name} bgColor={theme.textColor} />
-            <StyledUserName>{(navigation?.data?.name || 'user name') + loading}</StyledUserName>
+            <StyledUserName>{navigation?.data?.name || 'user name'}</StyledUserName>
             <TouchableWithoutFeedback onPress={handleLogout}>
               <StyledLogoutView>
                 <StyledLogoutIcon>
