@@ -35,6 +35,7 @@ import Geolocation from '@react-native-community/geolocation';
 import { showToast } from '../../helpers/useToast';
 import ScreenWrapper from '../../components/screenWrapper/ScreenWrapper';
 import { useBackHandler } from '@react-native-community/hooks';
+import NetInfo from '@react-native-community/netinfo';
 
 function Main({ navigation, setNavigation }) {
   const [loading, setLoading] = useState(false);
@@ -74,28 +75,36 @@ function Main({ navigation, setNavigation }) {
   );
 
   const handlePunch = async () => {
-    if (mutation.isLoading) {
+    if (mutation.isLoading || loading) {
       return;
     }
     setLoading(true);
-    Geolocation.getCurrentPosition(
-      position => {
-        const location = {
-          lat: position.coords.latitude,
-          long: position.coords.longitude,
-        };
-        setLoading(false);
+    NetInfo.fetch().then(state => {
+      if (state.isConnected && state.isInternetReachable) {
+        Geolocation.getCurrentPosition(
+          position => {
+            const location = {
+              lat: position.coords.latitude,
+              long: position.coords.longitude,
+            };
+            setLoading(false);
 
-        return mutation.mutate(location);
-      },
-      error => {
-        setLoading(false);
+            return mutation.mutate(location);
+          },
+          error => {
+            setLoading(false);
 
-        showToast(error.message);
+            showToast(error.message);
+            return;
+          },
+          { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 },
+        );
+      } else {
+        setLoading(false);
+        showToast('No internet connection');
         return;
-      },
-      { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 },
-    );
+      }
+    });
   };
 
   const handleLogout = () => {
@@ -118,7 +127,6 @@ function Main({ navigation, setNavigation }) {
     ]);
     return true;
   });
-
   return (
     <ScreenWrapper>
       <StyledMainView>
@@ -169,6 +177,7 @@ function Main({ navigation, setNavigation }) {
             currentPunchMode={currentPunchMode}
             lastIn={lastIn}
           />
+
           {/* Start/Stop Button */}
           <TouchableWithoutFeedback onPress={handlePunch}>
             <StyledStartButtonView>

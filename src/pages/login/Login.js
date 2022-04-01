@@ -25,9 +25,12 @@ import { SetPasswordModal } from './SetPasswordModal';
 import ScreenWrapper from '../../components/screenWrapper/ScreenWrapper.js';
 import { useBackHandler } from '@react-native-community/hooks';
 
+import NetInfo from '@react-native-community/netinfo';
 const Login = ({ navigation, setNavigation }) => {
   const [isPasswordHide, setIsPasswordHide] = useState(true);
   const [passwordModalVisible, setPasswordModalVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
+
   const mutation = useMutation(
     async payload => {
       return axios.post(process.env.BASE_URL + '/employees/login', payload);
@@ -53,10 +56,20 @@ const Login = ({ navigation, setNavigation }) => {
     initialValues: { email: '', password: '' },
     // validationSchema: { reviewSchema },
     onSubmit: values => {
-      if (mutation.isLoading) {
+      if (mutation.isLoading || loading) {
         return;
       }
-      mutation.mutate(values);
+      setLoading(true);
+      NetInfo.fetch().then(state => {
+        if (state.isConnected && state.isInternetReachable) {
+          mutation.mutate(values);
+          setLoading(false);
+        } else {
+          setLoading(false);
+          showToast('No internet connection');
+          return;
+        }
+      });
     },
   });
 
@@ -96,7 +109,7 @@ const Login = ({ navigation, setNavigation }) => {
           <StyledEmailPasswordView>
             <StyledEmailPasswordImage source={emailIcon} />
             <StyledTextInput
-              placeholderTextColor={'#C7C7CD'}
+              placeholderTextColor={theme.placeholder}
               blurOnSubmit={false}
               placeholder="Enter your email.."
               autoCompleteType="email"
@@ -115,14 +128,14 @@ const Login = ({ navigation, setNavigation }) => {
           <StyledEmailPasswordView>
             <StyledEmailPasswordImage source={passwordIcon} />
             <StyledTextInput
-              placeholderTextColor={'#C7C7CD'}
+              placeholderTextColor={theme.placeholder}
               ref={ref => (passwordInputRef.current = ref)}
               placeholder="Password"
               autoCapitalize="none"
               secureTextEntry={isPasswordHide}
               autoCorrect={false}
               returnKeyType="send"
-              onSubmitEditing={() => {
+              onSubmitEditing={async () => {
                 formik.handleSubmit();
               }}
               onChangeText={text => {
@@ -158,7 +171,7 @@ const Login = ({ navigation, setNavigation }) => {
             formik.handleSubmit();
           }}>
           <StyledLoginButtonView>
-            {mutation.isLoading ? (
+            {mutation.isLoading || loading ? (
               <BackgroundLoader />
             ) : (
               <StyledLoginButtonText>login</StyledLoginButtonText>

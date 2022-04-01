@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { passwordIcon } from '../../assets';
 import { showToast } from '../../helpers/useToast';
 import { StyledEmailPasswordImage, StyledEmailPasswordView } from './Login.styled';
@@ -10,6 +10,7 @@ import theme from '../../constants/theme';
 import PrimaryLoader from '../../components/PrimaryLoader';
 import { Modal, TouchableWithoutFeedback, View } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
+import NetInfo from '@react-native-community/netinfo';
 
 export const SetPasswordModal = ({
   passwordModalVisible,
@@ -19,6 +20,7 @@ export const SetPasswordModal = ({
   navigation,
   setNavigation,
 }) => {
+  const [loading, setLoading] = useState(false);
   const setPasswordMutation = useMutation(
     async payload =>
       axios.post(
@@ -38,9 +40,19 @@ export const SetPasswordModal = ({
 
   const formik = useFormik({
     initialValues: { password: '' },
-    // validationSchema: { reviewSchema },
     onSubmit: values => {
       setPasswordMutation.mutate(values);
+      setLoading(true);
+      NetInfo.fetch().then(state => {
+        if (state.isConnected && state.isInternetReachable) {
+          setPasswordMutation.mutate(values);
+          setLoading(false);
+        } else {
+          setLoading(false);
+          showToast('No internet connection');
+          return;
+        }
+      });
     },
   });
   const handleEye = () => {
@@ -54,7 +66,7 @@ export const SetPasswordModal = ({
       onRequestClose={() => {
         setPasswordModalVisible(!passwordModalVisible);
       }}>
-      {setPasswordMutation.isLoading ? (
+      {setPasswordMutation.isLoading || loading ? (
         <StyledView>
           <PrimaryLoader />
         </StyledView>
@@ -64,7 +76,7 @@ export const SetPasswordModal = ({
             <StyledEmailPasswordView>
               <StyledEmailPasswordImage source={passwordIcon} />
               <StyledTextInput
-                placeholderTextColor={'#C7C7CD'}
+                placeholderTextColor={theme.placeholder}
                 placeholder="Set Password"
                 autoCapitalize="none"
                 secureTextEntry={isPasswordHide}
