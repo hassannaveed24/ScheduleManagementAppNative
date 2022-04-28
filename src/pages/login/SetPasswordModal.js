@@ -24,7 +24,7 @@ export const SetPasswordModal = ({
   const setPasswordMutation = useMutation(
     async payload =>
       axios.post(
-        process.env.baseURL + '/employees/set-password/id/' + navigation.data._id,
+        process.env.BASE_URL + '/employees/set-password/id/' + navigation.data._id,
         payload,
       ),
     {
