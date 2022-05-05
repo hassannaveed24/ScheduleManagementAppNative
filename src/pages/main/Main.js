@@ -93,11 +93,10 @@ function Main({ navigation, setNavigation }) {
           },
           error => {
             setLoading(false);
-
             showToast(error.message);
             return;
           },
-          { enableHighAccuracy: true, maximumAge: 0 },
+          { enableHighAccuracy: true, timeout: 30000, maximumAge: 0 },
         );
       } else {
         setLoading(false);
