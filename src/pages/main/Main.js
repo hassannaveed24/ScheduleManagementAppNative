@@ -43,7 +43,6 @@ function Main({ navigation, setNavigation }) {
   const [lastIn, setLastIn] = useState(
     navigation.data.currentPunchMode === 'stop' ? navigation.data.lastIn : new Date(),
   );
-
   const mutation = useMutation(
     location => {
       return axios.post(
@@ -75,6 +74,9 @@ function Main({ navigation, setNavigation }) {
   );
 
   const handlePunch = async () => {
+    if (!navigation.data.location || !navigation.data.schedule) {
+      return;
+    }
     if (mutation.isLoading || loading) {
       return;
     }
@@ -126,6 +128,7 @@ function Main({ navigation, setNavigation }) {
     ]);
     return true;
   });
+
   return (
     <ScreenWrapper>
       <StyledMainView>
@@ -153,7 +156,7 @@ function Main({ navigation, setNavigation }) {
         <StyledView>
           <StyledHorizontalView>
             <Icon name="location-sharp" size={20} color={theme.textColor} />
-            <StyledText>{navigation.data?.location?.name || 'Assigned Location'}</StyledText>
+            <StyledText>{navigation.data?.location?.name || 'Location not assigned'}</StyledText>
           </StyledHorizontalView>
         </StyledView>
 
@@ -163,7 +166,7 @@ function Main({ navigation, setNavigation }) {
             <StyledIconView>
               <FontAwesome5 name="user" size={18} color={theme.textColor} />
             </StyledIconView>
-            <StyledText>{navigation?.data?.manager?.name || 'Manager Name'}</StyledText>
+            <StyledText>{navigation?.data?.manager?.name || 'Manager not assigned'}</StyledText>
           </StyledHorizontalView>
         </StyledView>
       </StyledMainView>
@@ -179,7 +182,7 @@ function Main({ navigation, setNavigation }) {
 
           {/* Start/Stop Button */}
           <TouchableWithoutFeedback onPress={handlePunch}>
-            <StyledStartButtonView>
+            <StyledStartButtonView isActive={navigation.data.location && navigation.data.schedule}>
               {mutation.isLoading || loading ? (
                 <BackgroundLoader />
               ) : (

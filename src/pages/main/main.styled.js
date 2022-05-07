@@ -80,7 +80,7 @@ export const StyledText = styled.Text`
 `;
 
 export const StyledStartButtonView = styled.View`
-  background-color: ${theme.primary};
+  background-color: ${props => (props.isActive ? theme.primary : theme.labelColor)};
   border-radius: 4px;
   height: 56px;
   width: 60%;

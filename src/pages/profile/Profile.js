@@ -36,11 +36,19 @@ const Profile = ({ navigation, setNavigation }) => {
           <StyledHorizontalLine />
           <StyledMainView>
             <StyledManagerName>
-              Manager: {navigation?.data?.manager?.name || 'Manager Name'}
+              Manager: {navigation?.data?.manager?.name || 'Not Assigned'}
             </StyledManagerName>
           </StyledMainView>
           <StyledHorizontalLine />
-          <ScheduleTable navigation={navigation} />
+          {navigation.data.schedule ? (
+            <ScheduleTable navigation={navigation} />
+          ) : (
+            <>
+              <StyledMainView>
+                <StyledManagerName>Schedule not assigned</StyledManagerName>
+              </StyledMainView>
+            </>
+          )}
         </StyledScreenView>
       </ScrollView>
     </ScreenWrapper>
