@@ -25,6 +25,9 @@
     "react-query": "^3.34.16",
     "styled-components": "^5.3.3"
   },
+  "engines": {
+    "node": "16.14.2"
+  },
   "devDependencies": {
     "@babel/core": "^7.12.9",
     "@babel/runtime": "^7.12.5",
