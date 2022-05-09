@@ -30,7 +30,7 @@ import BackgroundLoader from '../../components/BackgroundLoader';
 
 import axios from 'axios';
 import { useMutation } from 'react-query';
-import Geolocation from '@react-native-community/geolocation';
+import Geolocation from 'react-native-geolocation-service';
 
 import { showToast } from '../../helpers/useToast';
 import ScreenWrapper from '../../components/screenWrapper/ScreenWrapper';
@@ -98,7 +98,13 @@ function Main({ navigation, setNavigation }) {
             showToast(error.message);
             return;
           },
-          { enableHighAccuracy: true, timeout: 30000, maximumAge: 0 },
+          {
+            enableHighAccuracy: true,
+            timeout: 30000,
+            maximumAge: 0,
+            forceRequestLocation: true,
+            showLocationDialog: true,
+          },
         );
       } else {
         setLoading(false);
