@@ -35,7 +35,8 @@ import Geolocation from 'react-native-geolocation-service';
 import { showToast } from '../../helpers/useToast';
 import ScreenWrapper from '../../components/screenWrapper/ScreenWrapper';
 import { useBackHandler } from '@react-native-community/hooks';
-import NetInfo from '@react-native-community/netinfo';
+import { useNetInfo } from '@react-native-community/netinfo';
+import { hasPermission } from '../../hooks/LocationPermission.js';
 
 function Main({ navigation, setNavigation }) {
   const [loading, setLoading] = useState(false);
@@ -43,6 +44,43 @@ function Main({ navigation, setNavigation }) {
   const [lastIn, setLastIn] = useState(
     navigation.data.currentPunchMode === 'stop' ? navigation.data.lastIn : new Date(),
   );
+  const netInfo = useNetInfo();
+
+  const getLocation = async () => {
+    const locationPermission = await hasPermission();
+    if (!locationPermission) {
+      return;
+    }
+
+    Geolocation.getCurrentPosition(
+      position => {
+        const location = {
+          lat: position.coords.latitude,
+          long: position.coords.longitude,
+        };
+        mutation.mutate(location);
+      },
+      error => {
+        showToast(
+          error.message ||
+            "We couldn't fetch your location. Please check your device location service!",
+        );
+      },
+      {
+        accuracy: {
+          android: 'high',
+        },
+        enableHighAccuracy: true,
+        timeout: 30000,
+        maximumAge: 10000,
+        distanceFilter: 0,
+        forceRequestLocation: true,
+        forceLocationManager: false,
+        showLocationDialog: true,
+      },
+    );
+  };
+
   const mutation = useMutation(
     location => {
       return axios.post(
@@ -81,37 +119,45 @@ function Main({ navigation, setNavigation }) {
       return;
     }
     setLoading(true);
-    NetInfo.fetch().then(state => {
-      if (state.isConnected && state.isInternetReachable) {
-        Geolocation.getCurrentPosition(
-          position => {
-            const location = {
-              lat: position.coords.latitude,
-              long: position.coords.longitude,
-            };
-            setLoading(false);
 
-            return mutation.mutate(location);
-          },
-          error => {
-            setLoading(false);
-            showToast(error.message);
-            return;
-          },
-          {
-            enableHighAccuracy: true,
-            timeout: 30000,
-            maximumAge: 0,
-            forceRequestLocation: true,
-            showLocationDialog: true,
-          },
-        );
-      } else {
-        setLoading(false);
-        showToast('No internet connection');
-        return;
-      }
-    });
+    if (netInfo.isInternetReachable) {
+      await getLocation();
+      setLoading(false);
+    } else {
+      setLoading(false);
+      showToast('No internet connection. please');
+    }
+
+    // NetInfo.fetch().then(state => {
+    //   if (state.isConnected && state.isInternetReachable) {
+
+    //     // Geolocation.getCurrentPosition(
+    //     //   position => {
+    //     //     const location = {
+    //     //       lat: position.coords.latitude,
+    //     //       long: position.coords.longitude,
+    //     //     };
+    //     //     setLoading(false);
+
+    //     //     return mutation.mutate(location);
+    //     //   },
+    //     //   error => {
+    //     //     setLoading(false);
+    //     //     showToast(error.message);
+    //     //     return;
+    //     //   },
+    //     //   {
+    //     //     enableHighAccuracy: true,
+    //     //     timeout: 30000,
+    //     //     maximumAge: 0,
+    //     //   },
+    //     // );
+    //   } else {
+    //     setLoading(false);
+    //     showToast('No internet connection');
+    //     return;
+    //   }
+    // });
   };
 
   const handleLogout = () => {
